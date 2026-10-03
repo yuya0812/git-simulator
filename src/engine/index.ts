@@ -1,0 +1,8 @@
+export * from './types'
+export * from './result'
+export { createInitialState, INITIAL_FILES } from './initial'
+export { changedFiles, isAncestor, ancestors } from './graph'
+export { headFiles, uncommittedFiles, userChangedFiles } from './repo'
+export * from './operations/local'
+export * from './operations/remote'
+export * from './operations/github'
