@@ -4,7 +4,7 @@ import { useSimulator } from '../../store/useSimulator'
 import { layoutGraph, visibleCommits } from './layout'
 
 const COL_W = 108
-const LANE_H = 100
+const LANE_H = 86
 const PAD_X = 40
 const PAD_Y = 36
 const R = 17

@@ -93,21 +93,21 @@ export const useSimulator = create<Store>()((set, get) => {
       case 'ok':
         // 1文字打つごとに同じ説明を作り直さない
         if (result.event.type === 'edited' && isSameEdit(get().lastEvent, result.event)) {
-          set({ sim: result.state })
+          set({ sim: result.state, explanation: null })
         } else {
+          // pending（確認待ち）はここでは消さない。PR の自動承認が、開いている確認ダイアログを閉じてしまうため
           set({
             sim: result.state,
             lastEvent: result.event,
             happened: describeEvent(result.event, result.state),
             command: commandForEvent(result.event, result.state),
             explanation: null,
-            pending: null,
           })
         }
         afterEvent(result.event)
         break
       case 'rejected':
-        set({ explanation: describeRejection(result.rejection), pending: null })
+        set({ explanation: describeRejection(result.rejection) })
         break
       case 'needsConfirm':
         set({ pending: { warning: result.warning, operation } })
@@ -166,7 +166,9 @@ export const useSimulator = create<Store>()((set, get) => {
     },
     confirmPending: () => {
       const pending = get().pending
-      if (pending) apply(pending.operation, { confirmed: true })
+      if (!pending) return
+      set({ pending: null })
+      apply(pending.operation, { confirmed: true })
     },
     cancelPending: () => set({ pending: null }),
     // 前の操作の説明が、新しく開いたダイアログに残らないようにする

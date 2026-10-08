@@ -27,7 +27,7 @@ export default function App() {
           <div id="hint" className="scroll-mt-4">
             <HintPanel />
           </div>
-          <div className="grid h-[380px] grid-cols-2 gap-4">
+          <div className="grid min-h-[300px] grid-cols-2 gap-4">
             <LocalPanel />
             <RemotePanel />
           </div>
