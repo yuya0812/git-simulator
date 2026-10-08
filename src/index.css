@@ -22,3 +22,43 @@ body {
   background: var(--color-cream);
   color: var(--color-ink);
 }
+
+/* グラフのアニメーション。SVG の要素を自分の中心を基準に動かす */
+.graph-anim {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.graph-pop {
+  animation: graph-pop 400ms ease-out;
+}
+.graph-from-left {
+  animation: graph-from-left 600ms ease-out;
+}
+.graph-from-right {
+  animation: graph-from-right 600ms ease-out;
+}
+@keyframes graph-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+@keyframes graph-from-left {
+  from {
+    transform: translateX(-120px);
+    opacity: 0;
+  }
+}
+@keyframes graph-from-right {
+  from {
+    transform: translateX(120px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .graph-pop,
+  .graph-from-left,
+  .graph-from-right {
+    animation: none;
+  }
+}

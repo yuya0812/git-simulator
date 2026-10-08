@@ -1,5 +1,6 @@
 import { Dialogs } from './components/controls/Dialogs'
 import { ControlBar } from './components/controls/ControlBar'
+import { CommitDetail } from './components/graph/CommitDetail'
 import { FilePanel } from './components/files/FilePanel'
 import { LocalPanel, RemotePanel } from './components/graph/RepoPanels'
 import { Header } from './components/Header'
@@ -26,10 +27,11 @@ export default function App() {
           <div id="hint" className="scroll-mt-4">
             <HintPanel />
           </div>
-          <div className="grid h-[360px] grid-cols-2 gap-4">
+          <div className="grid h-[380px] grid-cols-2 gap-4">
             <LocalPanel />
             <RemotePanel />
           </div>
+          <CommitDetail />
           <StagingPanel />
           <main className="grid h-[72vh] min-h-[560px] grid-cols-2 gap-4">
             <FilePanel />

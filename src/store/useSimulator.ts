@@ -38,6 +38,8 @@ type Store = {
   pending: { warning: Warning; operation: Operation } | null
   dialog: Dialog | null
   selectedFile: FileName
+  /** グラフで選んだコミット（2つまで。Diff で比べる） */
+  selectedCommits: string[]
 
   run: (operation: Operation) => OpResult
   confirmPending: () => void
@@ -45,6 +47,8 @@ type Store = {
   openDialog: (dialog: Dialog) => void
   closeDialog: () => void
   selectFile: (file: FileName) => void
+  toggleCommit: (id: string) => void
+  clearSelectedCommits: () => void
   dismissExplanation: () => void
   reset: () => void
 }
@@ -58,6 +62,7 @@ const initial = () => ({
   pending: null,
   dialog: null,
   selectedFile: 'index.html' as FileName,
+  selectedCommits: [] as string[],
 })
 
 /** 「最初からやり直す」のたびに増やし、やり直す前に予約した処理を無効にする */
@@ -120,6 +125,13 @@ export const useSimulator = create<Store>()((set, get) => {
     openDialog: (dialog) => set({ dialog, explanation: null }),
     closeDialog: () => set({ dialog: null }),
     selectFile: (file) => set({ selectedFile: file }),
+    toggleCommit: (id) => {
+      const selected = get().selectedCommits
+      if (selected.includes(id)) set({ selectedCommits: selected.filter((c) => c !== id) })
+      // 3つ目を選んだら、いちばん古い選択を外す
+      else set({ selectedCommits: [...selected, id].slice(-2) })
+    },
+    clearSelectedCommits: () => set({ selectedCommits: [] }),
     dismissExplanation: () => set({ explanation: null }),
     reset: () => {
       generation += 1

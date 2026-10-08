@@ -1,52 +1,27 @@
-import { ancestors, deleteRemoteBranch, mergePullRequest, MAIN, type State } from '../../engine'
+import { deleteRemoteBranch, mergePullRequest, MAIN } from '../../engine'
 import { useSimulator } from '../../store/useSimulator'
 import { Button, Panel, Tag } from '../ui'
+import { CommitGraph } from './CommitGraph'
 
-/** branches の名札からたどれるコミット（新しい順） */
-function reachableCommits(state: State, branches: Record<string, string>): string[] {
-  const ids = new Set(Object.values(branches).flatMap((tip) => [...ancestors(state.commits, tip)]))
-  return Object.keys(state.commits)
-    .filter((id) => ids.has(id))
-    .reverse()
-}
-
-function CommitList({
-  state,
-  branches,
-  current,
-  tone,
-}: {
-  state: State
-  branches: Record<string, string>
-  current?: string
-  tone: 'local' | 'remote'
-}) {
-  const ids = reachableCommits(state, branches)
+function Legend({ side }: { side: 'local' | 'remote' }) {
+  const tone = side === 'local' ? 'bg-local-500' : 'bg-remote-500'
+  const ring = side === 'local' ? 'border-local-500 bg-local-100' : 'border-remote-500 bg-remote-100'
   return (
-    <ul className="space-y-1">
-      {ids.map((id) => {
-        const commit = state.commits[id]
-        const labels = Object.entries(branches).filter(([, tip]) => tip === id)
-        return (
-          <li key={id} className="flex flex-wrap items-center gap-2 rounded-xl px-2 py-1 text-sm hover:bg-stone-50">
-            <span
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white ${
-                tone === 'local' ? 'bg-local-500' : 'bg-remote-500'
-              }`}
-            >
-              {id}
-            </span>
-            <span className="text-xs text-stone-600">{commit.message}</span>
-            {commit.author === 'teammate' && <Tag tone="stone">チームメイト</Tag>}
-            {labels.map(([name]) => (
-              <Tag key={name} tone={tone}>
-                {name === current ? `[今ここ] ${name}` : name}
-              </Tag>
-            ))}
-          </li>
-        )
-      })}
-    </ul>
+    <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-stone-500">
+      <span className="flex items-center gap-1">
+        <span className={`inline-block h-3 w-3 rounded-full ${tone}`} />
+        自分のコミット
+      </span>
+      <span className="flex items-center gap-1">
+        <span className={`inline-block h-3 w-3 rounded-full border-2 ${ring}`} />
+        チームメイトのコミット
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="inline-block h-3 w-3 rounded-full border-2 border-dashed border-stone-300" />
+        こちらにはまだ無いコミット
+      </span>
+      <span>コミットをクリックすると、中身を確認できます</span>
+    </p>
   )
 }
 
@@ -56,7 +31,10 @@ export function LocalPanel() {
   return (
     <Panel title="LOCAL" badge={<Tag tone="local">自分のPC</Tag>} className="h-full border-local-100">
       {local ? (
-        <CommitList state={sim} branches={local.branches} current={local.current} tone="local" />
+        <>
+          <CommitGraph side="local" />
+          <Legend side="local" />
+        </>
       ) : (
         <p className="text-sm text-stone-500">まだ何もありません。</p>
       )}
@@ -69,7 +47,8 @@ export function RemotePanel() {
   const run = useSimulator((s) => s.run)
   return (
     <Panel title="REMOTE" badge={<Tag tone="remote">GitHub</Tag>} className="h-full border-remote-100">
-      <CommitList state={sim} branches={sim.remote.branches} tone="remote" />
+      <CommitGraph side="remote" />
+      <Legend side="remote" />
 
       {sim.pullRequests.length > 0 && (
         <div className="mt-3 space-y-2 border-t border-stone-100 pt-3">
