@@ -69,6 +69,7 @@ export function ControlBar() {
 function LatestResult() {
   const happened = useSimulator((s) => s.happened)
   const explanation = useSimulator((s) => s.explanation)
+  const command = useSimulator((s) => s.command)
   if (!happened && !explanation) return null
   return (
     <div className="mb-2 flex items-center gap-3 text-sm">
@@ -78,6 +79,11 @@ function LatestResult() {
         <span>
           <span className="mr-2 text-xs font-bold text-stone-500">今起きたこと</span>
           {happened!.did}
+          {command?.command && (
+            <code className="ml-3 rounded-lg bg-stone-800 px-2 py-0.5 font-mono text-xs text-emerald-300">
+              $ {command.command}
+            </code>
+          )}
         </span>
       )}
       <Button

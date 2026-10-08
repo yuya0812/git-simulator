@@ -9,7 +9,7 @@ import {
   type State,
   type Warning,
 } from '../engine'
-import { describeEvent, describeRejection, type Explanation, type Happened } from '../hints'
+import { commandForEvent, describeEvent, describeRejection, type Explanation, type GitCommand, type Happened } from '../hints'
 
 /** PR を作ってからチームメイトが承認するまでの時間 */
 export const APPROVE_DELAY_MS = 3000
@@ -30,6 +30,8 @@ type Store = {
   /** 直前に成功した操作 */
   lastEvent: SimEvent | null
   happened: Happened | null
+  /** 直前の操作を、本物の Git で打つとどうなるか */
+  command: GitCommand | null
   /** 実行しなかった操作の説明（次の操作まで表示） */
   explanation: Explanation | null
   /** 確認待ちの操作 */
@@ -51,6 +53,7 @@ const initial = () => ({
   sim: createInitialState(),
   lastEvent: null,
   happened: null,
+  command: null,
   explanation: null,
   pending: null,
   dialog: null,
@@ -73,6 +76,7 @@ export const useSimulator = create<Store>()((set, get) => {
             sim: result.state,
             lastEvent: result.event,
             happened: describeEvent(result.event, result.state),
+            command: commandForEvent(result.event, result.state),
             explanation: null,
             pending: null,
           })

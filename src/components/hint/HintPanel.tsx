@@ -1,5 +1,6 @@
 import { suggestNext } from '../../hints'
 import { useSimulator } from '../../store/useSimulator'
+import { GitCommandBox } from '../GitCommandBox'
 import { Button } from '../ui'
 
 /** 「今起きたこと」と「次にできること」。実行しなかった操作の説明もここに出す */
@@ -7,6 +8,7 @@ export function HintPanel() {
   const sim = useSimulator((s) => s.sim)
   const happened = useSimulator((s) => s.happened)
   const explanation = useSimulator((s) => s.explanation)
+  const command = useSimulator((s) => s.command)
   const dismiss = useSimulator((s) => s.dismissExplanation)
   const next = suggestNext(sim)
 
@@ -43,6 +45,11 @@ export function HintPanel() {
               </dd>
             </dl>
             {happened.note && <p className="mt-2 rounded-xl bg-orange-50 px-3 py-2">{happened.note}</p>}
+            {command && (
+              <div className="mt-2">
+                <GitCommandBox {...command} />
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-sm leading-relaxed">

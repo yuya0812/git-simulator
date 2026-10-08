@@ -13,8 +13,10 @@ import {
   type ConfirmOption,
   type OpResult,
   type State,
+  type Warning,
 } from '../../engine'
-import { describeWarning } from '../../hints'
+import { describeWarning, git, ON_GITHUB, type GitCommand } from '../../hints'
+import { GitCommandBox } from '../GitCommandBox'
 import { useSimulator, type Dialog } from '../../store/useSimulator'
 import { Button, Modal } from '../ui'
 
@@ -106,6 +108,7 @@ function CreateBranchDialog() {
           className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2 font-mono outline-none focus:border-local-500"
         />
       </label>
+      <GitCommandBox command={git.branch(name.trim() || '<ブランチ名>')} />
       <InlineExplanation />
     </Modal>
   )
@@ -132,6 +135,7 @@ function SwitchAfterCreateDialog({ branch }: { branch: string }) {
         今はまだ <b>{current}</b> にいます。<b>{branch}</b> に移動しますか？
       </p>
       <p className="text-stone-500">作ったブランチで作業するには、そのブランチに移動する必要があります。</p>
+      <GitCommandBox command={git.switch(branch)} />
     </Modal>
   )
 }
@@ -156,6 +160,7 @@ function SwitchBranchDialog() {
           </Button>
         ))}
       </div>
+      <GitCommandBox command={git.switch('<ブランチ名>')} />
       <InlineExplanation />
     </Modal>
   )
@@ -197,6 +202,7 @@ function CommitDialog() {
           className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2 outline-none focus:border-local-500"
         />
       </label>
+      <GitCommandBox command={git.commit(message.trim() || defaultCommitMessage(sim))} />
       <InlineExplanation />
     </Modal>
   )
@@ -220,6 +226,10 @@ function MergeDialog() {
           </Button>
         ))}
       </div>
+      <GitCommandBox
+        command={git.merge('<ブランチ名>')}
+        note="今いるブランチに、指定したブランチを取り込みます"
+      />
       <InlineExplanation />
     </Modal>
   )
@@ -250,6 +260,7 @@ function CreatePullRequestDialog() {
         ))}
         {remote.length + localOnly.length === 0 && <p className="text-stone-500">作業用のブランチがありません。</p>}
       </div>
+      <GitCommandBox note={`${ON_GITHUB}。push したブランチの「Compare & pull request」ボタンから作ります`} />
       <InlineExplanation />
     </Modal>
   )
@@ -257,9 +268,11 @@ function CreatePullRequestDialog() {
 
 function ConfirmDialog() {
   const pending = useSimulator((s) => s.pending)!
+  const sim = useSimulator((s) => s.sim)
   const confirm = useSimulator((s) => s.confirmPending)
   const cancel = useSimulator((s) => s.cancelPending)
   const message = describeWarning(pending.warning)
+  const command = commandForWarning(pending.warning, sim)
   return (
     <Modal
       title={`ちょっと待って: ${message.title}`}
@@ -276,6 +289,18 @@ function ConfirmDialog() {
       {message.body.map((line) => (
         <p key={line}>{line}</p>
       ))}
+      {command && <GitCommandBox {...command} />}
     </Modal>
   )
+}
+
+function commandForWarning(warning: Warning, state: State): GitCommand | null {
+  switch (warning.code) {
+    case 'commitOnMain':
+      return { command: git.commit(defaultCommitMessage(state) || '<メッセージ>') }
+    case 'pushToMain':
+      return { command: git.push(MAIN, !state.remote.branches[MAIN]) }
+    case 'localMerge':
+      return { command: git.merge(warning.from) }
+  }
 }
