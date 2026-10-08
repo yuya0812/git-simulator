@@ -155,6 +155,10 @@ describe('次にできること', () => {
     return suggestNext(state)[0]
   }
 
+  function rejectionCode(result: OpResult): string | undefined {
+    return result.kind === 'rejected' ? result.rejection.code : undefined
+  }
+
   function ok(result: OpResult): State {
     if (result.kind !== 'ok') throw new Error(JSON.stringify(result))
     return result.state
@@ -193,6 +197,16 @@ describe('次にできること', () => {
   it('チームメイトに先を越されたら pull を勧める', () => {
     let s = ok(createBranch(ok(cloneRepo(createInitialState())), 'feature/profile'))
     s = ok(teammateUpdate(s))
-    expect(first(s)).toContain('pull して最新に')
+    expect(first(s)).toContain('pull して取り込もう')
+  })
+
+  it('手元の main と GitHub の main が分かれたら、ブランチ移動ではなく pull を勧める', () => {
+    let s = ok(createBranch(ok(cloneRepo(createInitialState())), 'feature/profile'))
+    s = ok(teammateUpdate(s)) // index.html を変更
+    s = ok(editFile(s, 'style.css', 'mine'))
+    s = ok(stageFile(s, 'style.css'))
+    s = ok(commit(s, { confirmed: true }))
+    expect(rejectionCode(push(s, { confirmed: true }))).toBe('pushBehind')
+    expect(suggestNext(s)).toEqual(['GitHub の main が先に進んでいます。pull して取り込もう'])
   })
 })

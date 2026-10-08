@@ -21,11 +21,16 @@ export function suggestNext(state: State): string[] {
   const remoteMain = state.remote.branches[MAIN]
   const featureBranches = Object.keys(local.branches).filter((name) => name !== MAIN)
 
-  // 作業用のブランチがあるのに main にいる
-  if (current === MAIN && featureBranches.length > 0 && staged.length === 0 && unstaged.length === 0) {
-    const behind = isAncestor(state.commits, local.branches[MAIN], remoteMain) && local.branches[MAIN] !== remoteMain
-    if (behind) suggestions.push(`${GITHUB} の main が先に進んでいます。pull して最新にしよう`)
-    else suggestions.push(`作業用のブランチ（${featureBranches[0]}）に移動して、作業を始めよう`)
+  // 作業用のブランチがあるのに、GitHub と同じ状態の main にいる
+  // （main がずれているときは、下の push / pull の提案に任せる）
+  if (
+    current === MAIN &&
+    featureBranches.length > 0 &&
+    staged.length === 0 &&
+    unstaged.length === 0 &&
+    localTip === remoteMain
+  ) {
+    suggestions.push(`作業用のブランチ（${featureBranches[0]}）に移動して、作業を始めよう`)
   }
 
   if (unstaged.length > 0) suggestions.push(`変更した ${files(unstaged)} をステージングに置こう`)

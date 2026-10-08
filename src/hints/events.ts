@@ -34,7 +34,7 @@ export function describeEvent(event: SimEvent, state: State): Happened {
           did: `${event.from} から ${event.to} に移動しました`,
           changed: [`今いるブランチ（${event.from} → ${event.to}）`],
           unchanged: [`ファイルの中身（どちらも同じ ${commitLabel(event.at)} を指しているため）`, 'コミットや履歴'],
-          note: '名札を移っただけで、ファイルは何も変わっていません。ブランチはフォルダではなく、コミットに付いた名札だからです。',
+          note: '名札が移っただけで、ファイルは何も変わっていません。ブランチはフォルダではなく、コミットに付いた名札だからです。',
         }
       }
       return {

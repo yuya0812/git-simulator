@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif;
+  --font-mono: "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* 自分のPC（LOCAL）と GitHub（REMOTE）を色で区別する */
+  --color-local-50: #eef5ff;
+  --color-local-100: #dbe9ff;
+  --color-local-500: #4a86e8;
+  --color-local-700: #2c5fb3;
+  --color-remote-50: #edfaf4;
+  --color-remote-100: #d3f2e3;
+  --color-remote-500: #2fa875;
+  --color-remote-700: #1d7a53;
+
+  --color-cream: #fffaf0;
+  --color-ink: #3d3a35;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
