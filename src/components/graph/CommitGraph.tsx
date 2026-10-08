@@ -165,7 +165,8 @@ export function CommitGraph({ side }: { side: Side }) {
               <g
                 key={`label-${name}`}
                 style={{
-                  transform: `translate(${x - w / 2}px, ${y + R + 8 + index * LABEL_H}px)`,
+                  // 左端のコミットに長い名札が付いても欠けないようにする
+                  transform: `translate(${Math.max(4, x - w / 2)}px, ${y + R + 8 + index * LABEL_H}px)`,
                   transition: 'transform 450ms ease',
                 }}
               >

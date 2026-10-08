@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { parseCommand } from '../command/parse'
 import {
   approvePullRequest,
   createInitialState,
@@ -10,6 +11,9 @@ import {
   type Warning,
 } from '../engine'
 import { commandForEvent, describeEvent, describeRejection, type Explanation, type GitCommand, type Happened } from '../hints'
+
+/** コマンド入力の履歴1件 */
+export type CommandEntry = { input: string; lines: string[]; tone: 'ok' | 'info' | 'error' }
 
 /** PR を作ってからチームメイトが承認するまでの時間 */
 export const APPROVE_DELAY_MS = 3000
@@ -48,8 +52,11 @@ type Store = {
   /** グラフで選んだコミット（2つまで。Diff で比べる） */
   selectedCommits: string[]
   previewMode: PreviewMode
+  /** コマンド入力の履歴（新しいものが最後） */
+  commandLog: CommandEntry[]
 
   run: (operation: Operation) => OpResult
+  runCommand: (input: string) => void
   confirmPending: () => void
   cancelPending: () => void
   openDialog: (dialog: Dialog) => void
@@ -73,6 +80,7 @@ const initial = () => ({
   selectedFile: 'index.html' as FileName,
   selectedCommits: [] as string[],
   previewMode: 'githubMain' as PreviewMode,
+  commandLog: [] as CommandEntry[],
 })
 
 /** 「最初からやり直す」のたびに増やし、やり直す前に予約した処理を無効にする */
@@ -127,6 +135,35 @@ export const useSimulator = create<Store>()((set, get) => {
   return {
     ...initial(),
     run: (operation) => apply(operation, {}),
+    runCommand: (input) => {
+      if (!input.trim()) return
+      const parsed = parseCommand(input, get().sim)
+      let entry: CommandEntry
+      switch (parsed.type) {
+        case 'run': {
+          const result = apply(parsed.operation, {})
+          if (result.kind === 'ok') {
+            entry = { input, tone: 'ok', lines: [get().happened?.did ?? '', ...(parsed.note ? [parsed.note] : [])] }
+          } else if (result.kind === 'rejected') {
+            entry = { input, tone: 'error', lines: [`ちょっと待って: ${get().explanation?.title ?? ''}`, '詳しくはヒント欄を見てください'] }
+          } else {
+            entry = { input, tone: 'info', lines: ['実行する前に確認が必要です。画面のダイアログを見てください'] }
+          }
+          break
+        }
+        case 'output':
+          entry = { input, tone: 'info', lines: parsed.lines }
+          break
+        case 'dialog':
+          get().openDialog(parsed.dialog)
+          entry = { input, tone: 'info', lines: ['Diff の画面を開きました'] }
+          break
+        case 'error':
+          entry = { input, tone: 'error', lines: parsed.lines }
+          break
+      }
+      set({ commandLog: [...get().commandLog, entry].slice(-30) })
+    },
     confirmPending: () => {
       const pending = get().pending
       if (pending) apply(pending.operation, { confirmed: true })

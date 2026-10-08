@@ -1,6 +1,7 @@
 import { cloneRepo, pull, push, teammateUpdate } from '../../engine'
 import { useSimulator } from '../../store/useSimulator'
 import { Button } from '../ui'
+import { CommandLine } from './CommandLine'
 
 const PHASE_GUIDE = {
   beforeClone: 'まずは clone して、GitHub のプロジェクトを自分のPCにコピーしよう',
@@ -60,6 +61,9 @@ export function ControlBar() {
           </Group>
         </div>
         {PHASE_GUIDE[phase] && <p className="mt-2 text-sm font-medium text-orange-600">{PHASE_GUIDE[phase]}</p>}
+        <div className="mt-2">
+          <CommandLine />
+        </div>
       </div>
     </section>
   )

@@ -22,7 +22,7 @@ export default function App() {
 
       {/* 1画面に収めず縦に並べる。操作ボタンだけ画面下に固定する */}
       <div className="hidden lg:block">
-        <div className="mx-auto max-w-[1600px] space-y-4 px-6 pt-5 pb-48">
+        <div className="mx-auto max-w-[1600px] space-y-4 px-6 pt-5 pb-64">
           <Header />
           <div id="hint" className="scroll-mt-4">
             <HintPanel />
