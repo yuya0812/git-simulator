@@ -16,7 +16,21 @@ export function StagingPanel() {
   const staged = statuses.filter((s) => s.staged)
 
   return (
-    <Panel title="ステージング" badge={<Tag tone="local">自分のPC</Tag>} className="h-full">
+    <Panel
+      title="ステージング"
+      badge={<Tag tone="local">自分のPC</Tag>}
+      className="h-full"
+      actions={
+        <Button
+          variant="ghost"
+          className="!px-3 !py-1 text-xs"
+          disabled={!free || (editing.length === 0 && staged.length === 0)}
+          onClick={() => openDialog({ type: 'diffWorking' })}
+        >
+          変更を見る（Diff）
+        </Button>
+      }
+    >
       {!local ? (
         <p className="text-sm text-stone-500">clone すると使えるようになります。</p>
       ) : (

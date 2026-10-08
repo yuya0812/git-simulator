@@ -64,18 +64,20 @@ export function Modal({
   children,
   footer,
   onClose,
+  wide = false,
 }: {
   title: ReactNode
   children: ReactNode
   footer: ReactNode
   onClose: () => void
+  wide?: boolean
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/30 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl"
+        className={`max-h-[90vh] w-full overflow-auto rounded-3xl bg-white p-6 shadow-xl ${wide ? 'max-w-4xl' : 'max-w-md'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="mb-3 text-lg font-bold">{title}</h2>

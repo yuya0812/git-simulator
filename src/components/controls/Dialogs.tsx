@@ -16,6 +16,7 @@ import {
   type Warning,
 } from '../../engine'
 import { describeWarning, git, ON_GITHUB, type GitCommand } from '../../hints'
+import { CommitDiffDialog, WorkingDiffDialog } from '../diff/DiffDialogs'
 import { GitCommandBox } from '../GitCommandBox'
 import { useSimulator, type Dialog } from '../../store/useSimulator'
 import { Button, Modal } from '../ui'
@@ -52,6 +53,10 @@ export function Dialogs() {
       return <MergeDialog />
     case 'createPullRequest':
       return <CreatePullRequestDialog />
+    case 'diffWorking':
+      return <WorkingDiffDialog />
+    case 'diffCommits':
+      return <CommitDiffDialog from={dialog.from} to={dialog.to} />
   }
 }
 

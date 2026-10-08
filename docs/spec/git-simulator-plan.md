@@ -191,9 +191,9 @@ type State = {
 
 ### Phase 6: プレビューと Diff（見積: 3時間）
 
-- [ ] 6-1: iframe プレビュー（srcdoc、sandbox）
-- [ ] 6-2: 表示の切り替え（手元 / GitHub の main / 選択したコミット）
-- [ ] 6-3: Diff 表示（編集中 vs 最後のコミット、2つのコミット）
+- [x] 6-1: iframe プレビュー（srcdoc、sandbox）
+- [x] 6-2: 表示の切り替え（手元 / GitHub の main / 選択したコミット）
+- [x] 6-3: Diff 表示（編集中 vs 最後のコミット、2つのコミット）
 
 ### Phase 7: コマンド入力（見積: 2.5時間）
 

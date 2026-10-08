@@ -27,6 +27,8 @@ export const git = {
   push: (branch: string, firstTime: boolean) => (firstTime ? `git push -u origin ${branch}` : 'git push'),
   pull: () => 'git pull',
   deleteRemoteBranch: (name: string) => `git push origin --delete ${name}`,
+  diffHead: () => 'git diff HEAD',
+  diffCommits: (from: string, to: string) => `git diff ${from} ${to}`,
 }
 
 export const ON_GITHUB = 'GitHub の画面で行う操作です（git コマンドは使いません）'

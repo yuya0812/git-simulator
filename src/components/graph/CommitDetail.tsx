@@ -7,6 +7,9 @@ export function CommitDetail() {
   const sim = useSimulator((s) => s.sim)
   const selected = useSimulator((s) => s.selectedCommits)
   const clear = useSimulator((s) => s.clearSelectedCommits)
+  const openDialog = useSimulator((s) => s.openDialog)
+
+  const order = Object.keys(sim.commits)
 
   if (selected.length === 0) {
     return (
@@ -20,7 +23,19 @@ export function CommitDetail() {
     <section className="rounded-2xl border border-orange-200 bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="text-sm font-bold">選んだコミット</h2>
-        {selected.length === 2 && <Tag tone="orange">2つ選択中（比べる機能は準備中）</Tag>}
+        {selected.length === 2 && (
+          <Button
+            variant="primary"
+            className="!px-3 !py-1 text-xs"
+            onClick={() => {
+              // 古いコミット → 新しいコミットの順に比べる
+              const [from, to] = [...selected].sort((a, b) => order.indexOf(a) - order.indexOf(b))
+              openDialog({ type: 'diffCommits', from, to })
+            }}
+          >
+            2つを比べる（Diff）
+          </Button>
+        )}
         <Button variant="ghost" className="ml-auto !px-3 !py-1 text-xs" onClick={clear}>
           選択を外す
         </Button>
@@ -53,6 +68,15 @@ export function CommitDetail() {
               <p className="mt-2 text-xs text-stone-500">
                 変更したファイルだけでなく、そのときのプロジェクト全体がまるごと記録されています。
               </p>
+              {parent && (
+                <Button
+                  variant="secondary"
+                  className="mt-2 !px-3 !py-1 text-xs"
+                  onClick={() => openDialog({ type: 'diffCommits', from: parent.id, to: id })}
+                >
+                  親（コミット {parent.id}）と比べる
+                </Button>
+              )}
             </div>
           )
         })}

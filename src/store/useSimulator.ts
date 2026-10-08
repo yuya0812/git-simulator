@@ -24,6 +24,13 @@ export type Dialog =
   | { type: 'commit' }
   | { type: 'merge' }
   | { type: 'createPullRequest' }
+  /** 編集中 vs 最後のコミット */
+  | { type: 'diffWorking' }
+  /** 2つのコミットを比べる（from が古い方） */
+  | { type: 'diffCommits'; from: string; to: string }
+
+/** プレビューに何を表示するか */
+export type PreviewMode = 'working' | 'githubMain' | 'commit'
 
 type Store = {
   sim: State
@@ -40,6 +47,7 @@ type Store = {
   selectedFile: FileName
   /** グラフで選んだコミット（2つまで。Diff で比べる） */
   selectedCommits: string[]
+  previewMode: PreviewMode
 
   run: (operation: Operation) => OpResult
   confirmPending: () => void
@@ -49,6 +57,7 @@ type Store = {
   selectFile: (file: FileName) => void
   toggleCommit: (id: string) => void
   clearSelectedCommits: () => void
+  setPreviewMode: (mode: PreviewMode) => void
   dismissExplanation: () => void
   reset: () => void
 }
@@ -63,6 +72,7 @@ const initial = () => ({
   dialog: null,
   selectedFile: 'index.html' as FileName,
   selectedCommits: [] as string[],
+  previewMode: 'githubMain' as PreviewMode,
 })
 
 /** 「最初からやり直す」のたびに増やし、やり直す前に予約した処理を無効にする */
@@ -108,6 +118,7 @@ export const useSimulator = create<Store>()((set, get) => {
         if (pr?.status === 'open') apply((state) => approvePullRequest(state, event.prId), {})
       }, APPROVE_DELAY_MS)
     }
+    if (event.type === 'cloned') set({ previewMode: 'working' })
     if (event.type === 'branchCreated' && !event.switched) {
       set({ dialog: { type: 'switchAfterCreate', branch: event.name } })
     }
@@ -129,9 +140,14 @@ export const useSimulator = create<Store>()((set, get) => {
       const selected = get().selectedCommits
       if (selected.includes(id)) set({ selectedCommits: selected.filter((c) => c !== id) })
       // 3つ目を選んだら、いちばん古い選択を外す
-      else set({ selectedCommits: [...selected, id].slice(-2) })
+      // 選んだコミットの状態を、すぐプレビューで見られるようにする
+      else set({ selectedCommits: [...selected, id].slice(-2), previewMode: 'commit' })
     },
-    clearSelectedCommits: () => set({ selectedCommits: [] }),
+    clearSelectedCommits: () => {
+      set({ selectedCommits: [] })
+      if (get().previewMode === 'commit') set({ previewMode: get().sim.local ? 'working' : 'githubMain' })
+    },
+    setPreviewMode: (mode) => set({ previewMode: mode }),
     dismissExplanation: () => set({ explanation: null }),
     reset: () => {
       generation += 1
